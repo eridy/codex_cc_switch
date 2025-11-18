@@ -72,7 +72,14 @@
 
 ## 快速开始
 
-### 1. 安装依赖
+### 1. 克隆项目
+
+```bash
+git clone git@github.com:cd555yong/codex_cc_switch.git
+cd codex_cc_switch
+```
+
+### 2. 安装依赖
 
 ```bash
 pip install -r requirements.txt
@@ -83,10 +90,9 @@ pip install -r requirements.txt
 pip install fastapi uvicorn httpx
 ```
 
-### 2. 启动服务
+### 3. 启动服务
 
 ```bash
-cd /path/to/project
 python app.py
 ```
 

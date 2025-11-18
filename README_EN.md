@@ -72,7 +72,14 @@ This is a fully-featured **multi-protocol API proxy server** that supports:
 
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. Clone the Project
+
+```bash
+git clone git@github.com:cd555yong/codex_cc_switch.git
+cd codex_cc_switch
+```
+
+### 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -83,10 +90,9 @@ Or install manually:
 pip install fastapi uvicorn httpx
 ```
 
-### 2. Start Service
+### 3. Start Service
 
 ```bash
-cd /path/to/project
 python app.py
 ```
 
