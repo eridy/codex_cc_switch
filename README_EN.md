@@ -1,8 +1,8 @@
-# Claude/Codex API Smart Switch
+# Claude/Codex API Proxy - Complete Usage Guide
 
-> **Intelligent Multi-API Gateway** - Supports Claude Code, Codex CLI, and OpenAI format with smart routing and failover
+> **Universal API Proxy** - Supports Claude Code, Codex CLI, and OpenAI format with intelligent routing and format conversion
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads())
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -10,274 +10,408 @@
 
 ---
 
-## 🌟 Features
+## 📋 Table of Contents
 
-### 🔄 Intelligent API Management
-- **Multi-API Support**: Configure multiple Claude and Codex API keys
-- **Smart Failover**: Auto-switch to backup APIs on errors (3-error threshold)
-- **Priority Scheduling**: Automatic API selection by priority order
-- **Time-based Rotation**: Enable APIs by day of week (Monday-Sunday)
-- **Scheduled Activation**: Auto-activate API billing cycles at specified times
-
-### 🛡️ Advanced Error Handling
-- **Real-time Error Detection**: Monitor API errors and response quality
-- **Auto-switching**: Switch APIs when error threshold reached
-- **Cooldown Management**: 10-minute cooldown for failed APIs
-- **Retry Strategies**: Strategy retry, normal retry, and API switching
-- **Timeout Control**: Fine-grained timeout configuration
-
-### 📊 Real-time Monitoring
-- **Token Statistics**: Track token usage per model and date
-- **Cache Analytics**: Separate stats for input, output, cache creation, cache read
-- **Web Dashboard**: Graphical configuration and monitoring interface
-- **Daily Reports**: Visualize usage patterns with charts
-
-### 🔧 Flexible Configuration
-- **Web UI**: Manage all settings via browser
-- **Hot Reload**: Apply configuration changes without restart
-- **JSON Storage**: All configs saved in `json_data/all_configs.json`
+- [Project Overview](#project-overview)
+- [Core Features](#core-features)
+- [Quick Start](#quick-start)
+- [Client Configuration Examples](#client-configuration-examples)
+  - [Claude Code CLI Configuration](#claude-code-cli-configuration)
+  - [Codex CLI Configuration](#codex-cli-configuration)
+  - [Python OpenAI SDK Configuration](#python-openai-sdk-configuration)
+- [API Endpoints](#api-endpoints)
+- [Requirements](#requirements)
 
 ---
 
-## 🚀 Quick Start
+## Project Overview
 
-### Prerequisites
+This is a fully-featured **multi-protocol API proxy server** that supports:
 
-- Python 3.8+
-- pip package manager
+- ✅ **Claude Code API** - Proxy with multi-key rotation
+- ✅ **Codex CLI API** - Complete proxy (GPT-5-Codex)
+- ✅ **OpenAI Format** - Auto-conversion to Claude format
+- ✅ **Smart Failover** - Auto-switch, retry, cooldown management
+- ✅ **Real-time Stats** - Token usage tracking and visualization
+- ✅ **Web Management** - Graphical configuration interface
 
-### Installation
+**Port**: `5101`
+**Protocol**: HTTP/HTTPS
+**Start Command**: `python app.py`
 
-1. **Clone the repository**
-```bash
-git clone git@github.com:cd555yong/codex_cc_switch.git
-cd codex_cc_switch
-```
+---
 
-2. **Install dependencies**
+## Core Features
+
+### 🔄 Intelligent Multi-API Management
+- **Multi-config Support**: Configure multiple Claude and Codex APIs
+- **Primary-Backup Switch**: Auto-switch to backup when primary fails
+- **Time-based Enable**: Enable different APIs by day of week (Mon-Sun)
+- **Priority Scheduling**: Auto-select optimal API by config order
+- **Scheduled Activation**: Auto-activate API billing at specified times
+
+### 🛡️ Smart Failover Mechanism
+- **Error Detection**: Real-time API error detection and logging
+- **Auto-switch**: Switch API when consecutive errors reach threshold
+- **Cooldown Management**: Failed APIs enter cooldown to avoid frequent calls
+- **Retry Strategies**: Strategy retry, normal retry, switch retry
+- **Timeout Control**: Fine-grained timeout configuration
+
+### 📊 Real-time Statistics & Monitoring
+- **Token Statistics**: Auto-track token usage per request
+- **Per-model Stats**: Separate statistics for different models
+- **Daily Statistics**: Daily usage tracking and visualization
+- **Cache Statistics**: Separate new input, output, cache creation, cache read
+
+### 🔧 Flexible Configuration
+- **Web Management UI**: Graphical configuration for all parameters
+- **Hot Reload**: Apply config changes without restart
+- **JSON Config**: All configs saved in `json_data/all_configs.json`
+
+---
+
+## Quick Start
+
+### 1. Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Configure API keys**
-
-   Edit `json_data/all_configs.json` or use the web interface after starting the server.
-
-4. **Start the server**
+Or install manually:
 ```bash
+pip install fastapi uvicorn httpx
+```
+
+### 2. Start Service
+
+```bash
+cd /path/to/project
 python app.py
 ```
 
-The server will start on port **5101**.
+After starting, you'll see:
+```
+============================================================
+Claude Code API Server Startup
+============================================================
+API Rotation Config:
+  Primary APIs (by config priority):
+    Priority#1: Monday KEY | https://api-provider-1.example.com
+    ...
+  Backup APIs (available all week):
+    Backup API: https://api-provider-2.example.com/code
+    ...
+Port: 5101
+============================================================
+```
 
-5. **Access Web Dashboard**
+### 3. Access Admin Panel
 
-   Open your browser and visit: `http://localhost:5101`
+Open browser and visit: `http://localhost:5101`
+
+You can manage:
+- API configs (Claude and Codex)
+- OpenAI to Claude configs
+- Timeout retry strategies
+- Model conversion rules
+- Error handling strategies
+- Token usage statistics
 
 ---
 
-## 📖 Usage
+## Client Configuration Examples
 
-### 1. Claude Code Direct Mode
+### Claude Code CLI Configuration
 
-**Endpoint**: `POST /v1/messages`
+**Config file location**: `~/.claude/settings.json` (Windows: `C:\Users\username\.claude\settings.json`)
 
-**Example** (Python):
-```python
-import httpx
-
-url = "http://localhost:5101/v1/messages"
-headers = {
-    "authorization": "Bearer YOUR_KEY",
-    "content-type": "application/json",
-    "anthropic-version": "2023-06-01"
-}
-
-data = {
-    "model": "claude-sonnet-4-5-20250929",
-    "max_tokens": 8192,
-    "messages": [
-        {
-            "role": "user",
-            "content": [{"type": "text", "text": "Hello!"}]
-        }
-    ],
-    "stream": True
-}
-
-with httpx.Client() as client:
-    with client.stream("POST", url, json=data, headers=headers) as response:
-        for line in response.iter_lines():
-            print(line)
-```
-
-### 2. Codex CLI Direct Mode
-
-**Endpoint**: `POST /openai/responses`
-
-**Example** (Python):
-```python
-import httpx
-
-url = "http://localhost:5101/openai/responses"
-data = {
-    "model": "gpt-5-codex",
-    "input": [
-        {
-            "type": "message",
-            "role": "user",
-            "content": [{"type": "input_text", "text": "Analyze this code"}]
-        }
-    ],
-    "stream": True
-}
-
-headers = {
-    "authorization": "Bearer YOUR_KEY",
-    "content-type": "application/json"
-}
-
-with httpx.Client() as client:
-    with client.stream("POST", url, json=data, headers=headers) as response:
-        for line in response.iter_lines():
-            print(line)
-```
-
-### 3. OpenAI Format Conversion Mode
-
-**Endpoint**: `POST /v1/chat/completions`
-
-**Example** (Python):
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    api_key="YOUR_KEY",
-    base_url="http://localhost:5101/v1"
-)
-
-response = client.chat.completions.create(
-    model="gpt-4",  # Auto-converted to Claude model
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant"},
-        {"role": "user", "content": "Hello!"}
-    ],
-    stream=True
-)
-
-for chunk in response:
-    if chunk.choices[0].delta.content:
-        print(chunk.choices[0].delta.content, end='', flush=True)
-```
-
----
-
-## 🎯 Configuration
-
-### Web Dashboard
-
-Access `http://localhost:5101` to manage:
-
-- **API Configs**: Claude and Codex API keys, priorities, time-based activation
-- **OpenAI Conversion**: Dedicated configs for OpenAI format conversion
-- **Retry Strategies**: Configure multiple retry strategies with different timeouts
-- **Model Conversions**: Auto-convert model names (e.g., gpt-4 → claude-sonnet-4)
-- **Error Handling**: Configure HTTP status code handling strategies
-- **Timeout Settings**: Connection, read, write timeouts for different scenarios
-- **Token Statistics**: Real-time token usage charts and reports
-
-### Configuration File
-
-All settings are stored in `json_data/all_configs.json`:
-
+**Config content**:
 ```json
 {
-  "api_configs": [...],
-  "codex_configs": [...],
-  "openai_to_claude_configs": [...],
-  "retry_configs": [...],
-  "model_conversions": [...],
-  "timeout_settings": {...},
-  "error_handling_strategies": {...}
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "123",
+    "ANTHROPIC_BASE_URL": "http://localhost:5101/api",
+    "CLAUDE_CODE_MAX_THINKING_TOKENS": "32000",
+    "MAX_THINKING_TOKENS": "32000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "API_TIMEOUT_MS": "600000"
+  },
+  "permissions": {
+    "allow": [],
+    "deny": []
+  }
 }
 ```
 
----
+**Field descriptions**:
+- `ANTHROPIC_AUTH_TOKEN`: User key (needs to be mapped in proxy service's app.py)
+- `ANTHROPIC_BASE_URL`: Proxy service address (note the `/api` path)
+- `CLAUDE_CODE_MAX_THINKING_TOKENS`: Max tokens for thinking mode
+- `API_TIMEOUT_MS`: API timeout in milliseconds
 
-## 🔧 Architecture
-
-### Tech Stack
-
-- **Framework**: FastAPI (async web framework)
-- **HTTP Client**: httpx (async HTTP)
-- **Config Management**: JSON file-based
-- **Logging**: Python logging module
-- **Statistics**: Custom token tracking module
-
-### Core Modules
-
-1. **app.py** - FastAPI application, API routing, reverse proxy, failover logic
-2. **config_manager.py** - Unified configuration management, JSON persistence
-3. **openai_adapter.py** - OpenAI→Claude format conversion, thinking mode support
-4. **openai_to_codex.py** - OpenAI→Codex format conversion, full Codex protocol
-5. **token_stats.py** - Token usage tracking, real-time aggregation
-
-### Data Flow
-
-```
-Client Request
-  ↓
-Path Recognition (/v1/messages | /v1/chat/completions | /openai/responses)
-  ↓
-Format Conversion (OpenAI→Claude | OpenAI→Codex | Direct)
-  ↓
-API Selection (Primary → Backup → Retry Strategy)
-  ↓
-Request Forwarding (Streaming/Non-streaming)
-  ↓
-Error Handling (Detect → Record → Switch/Retry)
-  ↓
-Response Conversion (Claude→OpenAI | Codex→OpenAI | Direct)
-  ↓
-Token Statistics (Extract usage → Record → Aggregate)
-  ↓
-Return to Client
+**Usage**:
+```bash
+# After configuration, use Claude Code CLI directly
+claude "Please analyze this project's code structure"
 ```
 
 ---
 
-## 📝 Documentation
+### Codex CLI Configuration
 
-For detailed documentation in Chinese, see [使用说明.md](./使用说明.md).
+**Config file location**: `~/.codex/config.toml` (Windows: `C:\Users\username\.codex\config.toml`)
 
-Topics covered:
-- Client configuration (Claude Code CLI, Codex CLI, Python SDK)
-- Advanced API management
-- Smart failover mechanisms
-- Token statistics and monitoring
-- Troubleshooting FAQ
-- Maintenance and operations
+**Config content**:
+```toml
+model_provider = "code"
+model = "gpt-5.1-codex"
+model_reasoning_effort = "high"
+model_verbosity = "high"
+disable_response_storage = true
+windows_wsl_setup_acknowledged = true
+
+[http]
+# Disable system proxy to avoid conflicts with custom HTTPS endpoint
+proxy = "no_proxy"
+
+[model_providers.code]
+name = "code"
+base_url = "http://localhost:5101/openai"
+wire_api = "responses"
+requires_openai_auth = true  # Important: enables model switching
+
+[projects.'project_path']
+trust_level = "trusted"
+
+[notice]
+hide_gpt5_1_migration_prompt = true
+```
+
+**Field descriptions**:
+- `model`: Codex model name (gpt-5.1-codex or gpt-5-codex)
+- `base_url`: Proxy service address (note the `/openai` path)
+- `wire_api`: Use responses protocol
+- `requires_openai_auth`: Must be true for model switching support
+
+**Usage**:
+```bash
+# After configuration, use Codex CLI directly
+codex "Please refactor this code"
+```
+
+---
+
+### Python OpenAI SDK Configuration
+
+#### Method 1: Using OpenAI SDK (Recommended)
+
+```python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Use OpenAI SDK to call Claude API (via proxy service)
+Supports non-streaming and streaming responses
+"""
+
+from openai import OpenAI
+import sys
+import io
+
+# Windows console UTF-8 support
+if sys.platform == 'win32':
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    except AttributeError:
+        pass
+
+# Configuration
+BASE_URL = "http://localhost:5101"
+API_KEY = "123"  # User key (configure in proxy service)
+MODEL = "claude-sonnet-4-5-20250929"  # Or use "gpt-4" for auto-conversion
+
+# Create client
+client = OpenAI(
+    api_key=API_KEY,
+    base_url=f"{BASE_URL}/v1"
+)
+
+# Example 1: Non-streaming response
+print("=" * 60)
+print("Test 1: Non-streaming response")
+print("=" * 60)
+
+response = client.chat.completions.create(
+    model=MODEL,
+    messages=[
+        {"role": "system", "content": "You are a programming assistant"},
+        {"role": "user", "content": "Hello, please say a sentence"}
+    ],
+    stream=False,
+    max_tokens=100
+)
+
+print(f"\nResponse: {response.choices[0].message.content}")
+print(f"Token usage: {response.usage.total_tokens}")
+
+
+# Example 2: Streaming response
+print("\n" + "=" * 60)
+print("Test 2: Streaming response")
+print("=" * 60)
+
+stream = client.chat.completions.create(
+    model=MODEL,
+    messages=[
+        {"role": "user", "content": "Please write a short poem about spring"}
+    ],
+    stream=True,
+    max_tokens=500
+)
+
+print("\nStreaming response:")
+for chunk in stream:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end='', flush=True)
+
+print("\n\n✅ Test complete!")
+```
+
+#### Method 2: Using requests library (for debugging)
+
+```python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Use requests library for direct calls (for debugging streaming response issues)
+"""
+
+import requests
+import json
+import sys
+import io
+
+# Windows console UTF-8 support
+if sys.platform == 'win32':
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    except AttributeError:
+        pass
+
+# Configuration
+BASE_URL = "http://localhost:5101"
+API_KEY = "123"
+MODEL = "claude-sonnet-4-5-20250929"
+
+url = f"{BASE_URL}/v1/chat/completions"
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "model": MODEL,
+    "messages": [
+        {"role": "user", "content": "Please say a sentence"}
+    ],
+    "stream": True,
+    "max_tokens": 100
+}
+
+print(f"Sending streaming request to: {url}")
+print(f"Model: {MODEL}\n")
+
+try:
+    response = requests.post(url, headers=headers, json=data, stream=True, timeout=30)
+
+    print(f"Response status: {response.status_code}")
+    print(f"Reading streaming response:\n")
+    print("-" * 60)
+
+    # Read SSE streaming response line by line
+    for line in response.iter_lines():
+        if line:
+            line_str = line.decode('utf-8')
+
+            # Parse SSE format: data: {...}
+            if line_str.startswith('data: '):
+                data_str = line_str[6:]
+
+                # Skip [DONE] marker
+                if data_str == '[DONE]':
+                    continue
+
+                try:
+                    # Parse JSON and extract content
+                    chunk_obj = json.loads(data_str)
+                    if 'choices' in chunk_obj and len(chunk_obj['choices']) > 0:
+                        delta = chunk_obj['choices'][0].get('delta', {})
+                        content = delta.get('content', '')
+                        if content:
+                            print(content, end='', flush=True)
+                except json.JSONDecodeError:
+                    pass
+
+    print("\n" + "-" * 60)
+    print("\n✅ Read complete")
+
+except Exception as e:
+    print(f"\n❌ Error: {e}")
+```
+
+**Configuration notes**:
+- `BASE_URL`: Proxy service address `http://localhost:5101`
+- `API_KEY`: User key, needs mapping in app.py's `USER_KEY_MAPPING`
+- `MODEL`: Can use Claude model name or GPT model name (auto-converted)
+
+**Supported model names**:
+- `claude-sonnet-4-5-20250929` - Claude 4.5 Sonnet (direct)
+- `gpt-4` - Auto-converted to Claude 4.0 Sonnet
+- `gpt-4-turbo` - Auto-converted to Claude 4.0 Sonnet
+- `gpt-3.5-turbo` - Auto-converted to Claude 4.0 Sonnet
+
+**Thinking mode**:
+```python
+# Enable thinking mode - add -thinking to model name
+MODEL = "claude-sonnet-4-5-20250929-thinking"
+# Note: temperature must be 1 in thinking mode
+```
+
+---
+
+## API Endpoints
+
+- `POST /v1/messages` - Claude direct
+- `POST /v1/chat/completions` - OpenAI to Claude
+- `POST /openai/responses` - Codex direct
+- `GET /` - Web admin home
+- `GET /token-stats.html` - Token statistics page
+- `GET /api/configs` - Get API configs
+- `POST /api/reload` - Reload configs
+- `GET /api/token-stats` - Get token statistics
+- `POST /api/token-stats/reset` - Reset statistics
+
+---
+
+## Requirements
+
+- Python 3.8+
+- FastAPI 0.100+
+- httpx 0.24+
+- uvicorn 0.22+
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Feel free to submit Issues and Pull Requests.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- [Anthropic](https://www.anthropic.com/) - Claude API
-- [OpenAI](https://openai.com/) - Codex CLI
-- [FastAPI](https://fastapi.tiangolo.com/) - Modern web framework
-- [httpx](https://www.python-httpx.org/) - HTTP client library
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
