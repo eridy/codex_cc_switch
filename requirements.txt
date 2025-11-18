@@ -1,0 +1,16 @@
+# Claude/Codex API Smart Switch - Python依赖
+# 安装命令: pip install -r requirements.txt
+
+# Web框架
+fastapi>=0.100.0
+
+# HTTP客户端
+httpx>=0.24.0
+
+# ASGI服务器
+uvicorn>=0.22.0
+
+# 说明：
+# - fastapi: 异步Web框架，用于API路由和请求处理
+# - httpx: 异步HTTP客户端，用于转发请求到上游API
+# - uvicorn: ASGI服务器，用于运行FastAPI应用
